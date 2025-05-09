@@ -1,0 +1,1 @@
+{"Training loss": {"Total loss": [0.1962513280720336], "Recon loss": [0.09294230255598644], "Imputed loss": [0.10330902504681103, 0.03182577964539356]}, "Validation loss": {"Total loss": [0.05100352074175812], "Recon loss": [0.019177741200188354], "Imputed loss": []}, "Last epoch": 0}
