@@ -34,9 +34,9 @@ class BlochODEFunc(nn.Module):
         
         self.params = params
     
-    def set_zenc(self, z_encoded):
+    def set_zenc(self, zenc):
          
-         self.z_encoded = z_encoded
+         self.zenc = zenc
     
     def get_nfe(self):
         
@@ -45,7 +45,7 @@ class BlochODEFunc(nn.Module):
     def forward(self, t, x):
         
         self.nfe += 1
-        x = torch.cat([x, self.params, self.z_encoded], dim = -1)
+        x = torch.cat([x, self.params, self.zenc], dim = -1)
         return self.net(x)
 
     
@@ -191,31 +191,21 @@ class NanEmbed(torch.nn.Module):
         # create embedding weights
         self.emb_layer = nn.Linear(input_dim, output_dim)
         self.freq_embedding = nn.Embedding(seq_len, output_dim)
-        self.nanVal = nn.Parameter(torch.zeros(1,output_dim))
+        # self.nanVal = nn.Parameter(torch.zeros(1,output_dim))
+        self.nanVal = nn.Parameter(torch.tensor([-1.0]))
         self.output_dim = output_dim
         self.seq_len = seq_len
         
     def forward(self, x, mask):
-        # embed each feature into a larger embedding vector of size output_dim
-        x = torch.nan_to_num(x, nan = -1.0) 
+        # embed each feature into a larger embedding vector of size output_dim 
+        x[torch.isnan(x)] = self.nanVal
         emb = self.emb_layer(x)
+        
+        # freqEmbed = self.freq_embedding(torch.arange(self.seq_len).to(x.device))
+        # freqEmbed = freqEmbed.unsqueeze(0).expand(x.shape[0],-1,-1)
+
+        # emb = emb + freqEmbed
 
         mask = mask.expand(-1, -1, self.output_dim)
-        mask = mask.reshape(-1, self.output_dim)
-        nanInds = ~mask.sum(dim = 1).bool()
-
-        emb = emb.reshape(-1, self.output_dim)
-
-        emb[nanInds,:] = self.nanVal
-
-        mask = mask.reshape(-1,self.seq_len, self.output_dim)
-        emb = emb.reshape(-1, self.seq_len, self.output_dim)
-        
-        freqEmbed = self.freq_embedding(torch.arange(self.seq_len).to(x.device))
-        freqEmbed = freqEmbed.unsqueeze(0).expand(x.shape[0],-1,-1)
-
-        emb = emb + freqEmbed
-
-        # mask = mask.expand(-1, -1, self.output_dim)
         emb = torch.cat((emb, mask), dim = -1)
         return emb

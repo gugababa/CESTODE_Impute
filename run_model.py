@@ -92,8 +92,8 @@ def train(model, epochs, train_loader, val_loader, model_save_path, model_name, 
             outputs = model(spec, B1, sat, masks, offsets)
             
             # loss, recon_loss, imputed_loss, kl_loss, kl_weight = custom_criterion_vae(outputs, spec_ori, masks, mu, log_var, epoch, epochs, r = 0.75, m = 20)
-            _, recon_loss, imputed_loss = custom_criterion(outputs, spec_ori, masks)
-            loss, recon_loss, imputed_loss = weighted_loss_fn(recon_loss, imputed_loss)
+            loss, recon_loss, imputed_loss = custom_criterion(outputs, spec_ori, masks)
+            # loss, recon_loss, imputed_loss = weighted_loss_fn(recon_loss, imputed_loss)
             
             loss.backward()
             optimizer.step()
@@ -119,8 +119,8 @@ def train(model, epochs, train_loader, val_loader, model_save_path, model_name, 
                 outputs = model(spec, B1, sat, masks, offsets)
                 
                 # vloss, v_recon_loss, v_imputed_loss, v_kl_loss, _ = custom_criterion_vae(outputs, spec_ori, masks, mu, log_var, epoch, epochs, r = 0.75, m = 20)
-                _, v_recon_loss, v_imputed_loss = custom_criterion(outputs, spec_ori, masks)
-                vloss, v_recon_loss, v_imputed_loss = weighted_loss_fn(v_recon_loss, v_imputed_loss)
+                vloss, v_recon_loss, v_imputed_loss = custom_criterion(outputs, spec_ori, masks)
+                # vloss, v_recon_loss, v_imputed_loss = weighted_loss_fn(v_recon_loss, v_imputed_loss)
                 
                 val_dict['Total loss'] += vloss.item()*spec.size(0)
                 val_dict['Recon loss'] += v_recon_loss.item()*spec.size(0)
